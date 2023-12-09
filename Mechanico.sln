@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34316.72
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mechanico", "Mechanico\Mechanico.csproj", "{915E2C1F-F46F-4334-AC32-0A0A7AF7AFC0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{915E2C1F-F46F-4334-AC32-0A0A7AF7AFC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{915E2C1F-F46F-4334-AC32-0A0A7AF7AFC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{915E2C1F-F46F-4334-AC32-0A0A7AF7AFC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{915E2C1F-F46F-4334-AC32-0A0A7AF7AFC0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3CB4FC7C-E588-4473-A25F-14F3C9C7C59E}
+	EndGlobalSection
+EndGlobal
