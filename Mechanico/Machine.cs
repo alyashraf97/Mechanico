@@ -5,6 +5,8 @@ public class Machine
     public string Name { get; set; }
     public string IpAddress { get; set; }
 
+    public Machine() { }
+
     public Machine(string name)
     {
         IpAddress = Dns.GetHostAddresses(name)[0].ToString() ?? "";
@@ -16,5 +18,4 @@ public class Machine
         IpAddress = ipAddress;
         Name = name;
     }
-
 }
