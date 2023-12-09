@@ -1,4 +1,5 @@
-﻿using YamlDotNet.Serialization;
+﻿using Serilog;
+using YamlDotNet.Serialization;
 
 public class Configuration
 {
@@ -27,12 +28,22 @@ public class Configuration
         DatabaseName = config.DatabaseName;
     }
 
-
     public static Configuration FromYaml(string yamlFileName)
     {
         var deserializer = new DeserializerBuilder().Build();
         var yamlFilePath = Path.Combine(Directory.GetCurrentDirectory(), yamlFileName);
         var yaml = File.ReadAllText(yamlFilePath);
         return deserializer.Deserialize<Configuration>(yaml);
+    }
+
+    public void Validate()
+    {
+        if (string.IsNullOrEmpty(Username) && string.IsNullOrEmpty(Password) && string.IsNullOrEmpty(PrivateKey))
+        {
+            Log.Fatal($"Error occurred at {DateTime.Now}, Invalid Configuration: Either Username, Password, or PrivateKey must be provided in the configuration.");
+            throw new InvalidOperationException("Either Username, Password, or PrivateKey must be provided in the configuration.");
+        }
+
+        // Add other validations as needed
     }
 }

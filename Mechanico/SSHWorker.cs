@@ -1,4 +1,6 @@
-﻿public class SSHWorker : BackgroundService
+﻿using Serilog;
+
+public class SSHWorker : BackgroundService
 {
     private readonly Configuration _config;
     Dictionary<Machine, Job> _jobs;
@@ -23,11 +25,13 @@
                 }
                 catch (OperationCanceledException)
                 {
+                    Log.Information("Task was cancelled.");
                     // Handle the tasks being cancelled if they take longer than a minute
                     // You might want to log this event or handle it in some other way
                 }
                 catch (Exception ex)
                 {
+                    Log.Error(ex, "An error occurred during job execution: {ErrorMessage}", ex.Message);
                     // Handle other exceptions
                 }
             }

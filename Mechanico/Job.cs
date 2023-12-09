@@ -1,4 +1,5 @@
 ﻿using Renci.SshNet;
+using Serilog;
 using System.Collections.Concurrent;
 
 public class Job
@@ -31,6 +32,7 @@ public class Job
                 !string.IsNullOrEmpty(diskResult.Error) || !string.IsNullOrEmpty(connResult.Error) ||
                 !string.IsNullOrEmpty(netResult.Error))
             {
+                Log.Error("Error in command execution: {Error}", cpuResult.Error ?? memResult.Error ?? diskResult.Error ?? connResult.Error ?? netResult.Error);
                 // Handle command errors
             }
 
@@ -44,7 +46,8 @@ public class Job
         }
         catch (Exception ex)
         {
-            // Handle SSH connection and command execution errors
+            Log.Error(ex, "An error occurred in the SSH worker: {ErrorMessage}", ex.Message);
+            // Handle other exceptions
         }
     }
 }
