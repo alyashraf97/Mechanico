@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Threading;
-
-public class SSHWorker : BackgroundService
+﻿public class SSHWorker : BackgroundService
 {
     private readonly Configuration _config;
     Dictionary<Machine, Job> _jobs;

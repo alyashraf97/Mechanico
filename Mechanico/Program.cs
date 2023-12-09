@@ -1,6 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using System.Collections.Concurrent;
-
 public class Program
 {
     public static void Main(string[] args)

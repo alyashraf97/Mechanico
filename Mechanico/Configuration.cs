@@ -1,14 +1,10 @@
 ﻿using YamlDotNet.Serialization;
-using System.IO;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using System.Reflection.PortableExecutable;
 
 public class Configuration
 {
     public string? Username { get; set; }
     public string? Password { get; set; }
     public string? PrivateKey { get; set; }
-    public Command[]? EnabledCommands { get; set; }
     public Machine[] Hosts { get; set; }
     public string LogFilePath { get; set; }
     public string DatabaseUri { get; set; }
@@ -25,7 +21,6 @@ public class Configuration
         Username = config.Username;
         Password = config.Password;
         PrivateKey = config.PrivateKey;
-        EnabledCommands = config.EnabledCommands;
         Hosts = config.Hosts;
         LogFilePath = config.LogFilePath;
         DatabaseUri = config.DatabaseUri;
