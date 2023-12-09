@@ -1,14 +1,10 @@
 ﻿using Renci.SshNet;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 public class Job
 {
     private SshClient? _sshClient;
-    public Output? Output { get; private set; }
+    public static ConcurrentQueue<Output> Outputs = new();
 
     public Job(Machine host, Configuration config)
     {
@@ -17,23 +13,38 @@ public class Job
 
     public async Task Run(CancellationToken cancellationToken)
     {
-        if (!_sshClient.IsConnected)
+        try
         {
-            await _sshClient.ConnectAsync(cancellationToken);
+            if (!_sshClient.IsConnected)
+            {
+                await _sshClient.ConnectAsync(cancellationToken);
+            }
+
+            var cpuResult = _sshClient.RunCommand(Cpu.Command);
+            var memResult = _sshClient.RunCommand(Memory.Command);
+            var diskResult = _sshClient.RunCommand(Disk.Command);
+            var connResult = _sshClient.RunCommand(Connection.Command);
+            var netResult = _sshClient.RunCommand(NetworkStats.Command);
+
+            // Check for errors in the command results
+            if (!string.IsNullOrEmpty(cpuResult.Error) || !string.IsNullOrEmpty(memResult.Error) ||
+                !string.IsNullOrEmpty(diskResult.Error) || !string.IsNullOrEmpty(connResult.Error) ||
+                !string.IsNullOrEmpty(netResult.Error))
+            {
+                // Handle command errors
+            }
+
+            var cpu = Cpu.Parse(cpuResult.Result);
+            var mem = Memory.Parse(memResult.Result);
+            var disk = Disk.Parse(diskResult.Result);
+            var conn = Connection.Parse(connResult.Result);
+            var net = NetworkStats.Parse(netResult.Result);
+
+            Outputs.Enqueue(new Output { Cpu = cpu, Memory = mem, Disk = disk, Connection = conn, NetworkStats = net });
         }
-
-        var cpuResult = _sshClient.RunCommand(Cpu.Command);
-        var memResult = _sshClient.RunCommand(Memory.Command);
-        var diskResult = _sshClient.RunCommand(Disk.Command);
-        var connResult = _sshClient.RunCommand(Connection.Command);
-        var netResult = _sshClient.RunCommand(NetworkStats.Command);
-
-        var cpu = Cpu.Parse(cpuResult.Result);
-        var mem = Memory.Parse(memResult.Result);
-        var disk = Disk.Parse(diskResult.Result);
-        var conn = Connection.Parse(connResult.Result);
-        var net = NetworkStats.Parse(netResult.Result);
-
-        Output = new Output { Cpu = cpu, Memory = mem, Disk = disk, Connection = conn, NetworkStats = net };
+        catch (Exception ex)
+        {
+            // Handle SSH connection and command execution errors
+        }
     }
- }
+}

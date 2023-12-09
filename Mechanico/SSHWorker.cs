@@ -1,47 +1,59 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection.PortableExecutable;
-using System.Threading;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Renci.SshNet;
+using System.Threading;
 
 public class SSHWorker : BackgroundService
 {
-    private readonly ConcurrentQueue<Output> _aliveQueue;
-    private readonly ConcurrentQueue<Output> _deadQueue;
     private readonly Configuration _config;
+    Dictionary<Machine, Job> _jobs;
 
-    public SSHWorker(Configuration config, ConcurrentQueue<Output> parsingQueue, ConcurrentQueue<Output> deadQueue)
+    public SSHWorker(Configuration config, Dictionary<Machine, Job> jobs)
     {
         _config = config;
-        _aliveQueue = parsingQueue;
-        _deadQueue = deadQueue;
+        _jobs = jobs;
     }
-
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            List<Job> jobs = new List<Job>();
-            foreach (var host in _config.Hosts)
+            // Create a new CancellationTokenSource that cancels after one minute
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken))
             {
-                var newJob = new Job(host, _config);
-                jobs.Add(newJob);
-                _ = newJob.Run(stoppingToken);
+                cts.CancelAfter(TimeSpan.FromMinutes(1));
+                try
+                {
+                    await RunJobs(cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Handle the tasks being cancelled if they take longer than a minute
+                    // You might want to log this event or handle it in some other way
+                }
+                catch (Exception ex)
+                {
+                    // Handle other exceptions
+                }
             }
+            await Task.Delay(60000, stoppingToken); // Wait for one minute before starting the next cycle
+        }
+    }
 
-            int delay = 60000 - (int)stopwatch.ElapsedMilliseconds;
-            if (delay > 0)
-            {
-                await Task.Delay(delay);
-            }
+    private async Task RunJobs(CancellationToken cancellationToken)
+    {
+        List<Task> tasks = new();
+        foreach (var job in _jobs)
+        {
+            tasks.Add(job.Value.Run(cancellationToken));
+        }
+        try
+        {
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException)
+        {
+            // Handle the tasks being cancelled if they take longer than a minute
+            // You might want to log this event or handle it in some other way
         }
     }
 }
